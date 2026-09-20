@@ -1,6 +1,6 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+Kiranenderreddy Jeedipally and I picked Campuslife
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -21,6 +21,10 @@
 
 ## What This Does
 
+## What This Does
+
+I chose the `campus_life` corpus, which contains information about student life such as courses, housing, dining, campus policies, deadlines, and other campus resources. This RAG system retrieves relevant information from those documents and uses it to answer student questions. It can answer questions such as course withdrawal deadlines, printing credits, study abroad applications, transcript costs, and course assessments. If a question is not covered by the corpus, the relevance gate is designed to refuse the question instead of generating an unsupported answer.
+
 <!-- Three or four sentences. Which corpus you picked, and the kinds of
      questions your system answers. Write it for someone who has never seen
      this repo.
@@ -29,8 +33,8 @@
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:**Target maximum of 500 characters
+**Overlap:**0
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -41,6 +45,11 @@
      more than pretending you got it right first time.
 
      Milestone 3. -->
+
+I chose a paragraph-aware chunking strategy because the `campus_life` corpus contains mostly short, fact-focused student posts. With the starter 800-character chunker, the 88 documents produced only 88 chunks, so most documents were not being split at all. I used a 500-character target and split on paragraph boundaries so that complete thoughts stay together instead of being cut at an arbitrary character position. I used no overlap because the chunks are separated at natural paragraph boundaries rather than fixed character positions.
+
+After re-indexing, the 88 documents produced 90 chunks with an average length of 310 characters. I inspected five sample chunks and all five could be understood without needing the text before or after them.
+
 
 ## Sample Chunks
 
@@ -55,26 +64,35 @@
 
 **Chunk 1** — source: `` — produced by: ``
 
+source: `admin_add_drop_deadline.txt#0` — produced by: `chunker.py::split_documents`
+
 ```
 ```
 
 **Chunk 2** — source: `` — produced by: ``
+source: `course_biol_160_exams.txt#0` — produced by: `chunker.py::split_documents`
+
 
 ```
 ```
 
 **Chunk 3** — source: `` — produced by: ``
 
+source: `course_math_220_exams.txt#0` — produced by: `chunker.py::split_documents`
 ```
 ```
 
 **Chunk 4** — source: `` — produced by: ``
 
+
+source: `dining_the_ridgeway_cafe.txt#0` — produced by: `chunker.py::split_documents`
 ```
 ```
 
 **Chunk 5** — source: `` — produced by: ``
 
+
+source: `housing_morrow_house.txt#0` — produced by: `chunker.py::split_documents`
 ```
 ```
 
@@ -83,9 +101,11 @@
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** How much does an official transcript cost?
 
-**Answer:**
+**Answer:**  An official transcript costs $8.
+
+Source: admin_transcript_requests.txt
 
 ```
 ```
@@ -105,6 +125,24 @@
 |---|---|---|
 |  |  |  |
 
+
+**My relevance cutoff:** 0.60
+
+I tested five questions that are answerable from the `campus_life` corpus and five out-of-scope questions. The in-corpus questions had best distances between 0.1847 and 0.3767, while the out-of-scope questions had best distances between 0.8246 and 0.93. This created a clear gap between the two groups. I kept the cutoff at 0.60 because it falls inside that gap: all five tested in-corpus questions were below it and all five tested out-of-scope questions were above it.
+
+| Question | In corpus? | Best distance |
+|---|---|---:|
+| How much printing credit does each student get per semester? | Yes | 0.3767 |
+| When do study abroad applications open for the following academic year? | Yes | 0.2380 |
+| How much does an official transcript cost? | Yes | 0.1847 |
+| What is the deadline for withdrawing from a course? | Yes | 0.3510 |
+| How many unit tests are there in BIOL 160? | Yes | 0.2599 |
+| What is the capital of Mongolia? | No | 0.8246 |
+| How do I change the oil in a diesel engine? | No | 0.93 |
+| Who won the 1994 World Cup? | No | 0.88 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.84 |
+| How do I write a for loop in Rust? | No | 0.89 |
+
 ## How I Used AI
 
 <!-- Two specific moments. For each: what you asked for, what came back, and
@@ -118,8 +156,12 @@
 
 **1.**
 
+I used AI throughout the project as a learning assistant to understand the RAG process step by step before and while implementing it. I asked questions about concepts such as documents, chunking, embeddings, vector search, retrieval, relevance distance, the gate, and grounded generation. Instead of only copying code, I asked why decisions were being made. 
+
 **2.**
 
+
+ I also used AI while testing and interpreting my system. I ran the retrieval commands myself and provided the actual distances to AI. AI helped me organize and compare the five in-corpus distances (0.1847–0.3767) with the five out-of-scope distances (0.8246–0.93). From those results, I understood why the 0.60 relevance cutoff was reasonable and kept it instead of changing the value without evidence. Overall, I used AI at each stage to understand the RAG logic, troubleshoot issues, and guide my implementation, while I executed and tested the project myself.
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
