@@ -57,6 +57,10 @@ in at least 4 of 5 tries.
 
 ## 4. Something about your chunks
 
+
+At least 4 of 5 sampled chunks should contain a complete thought and
+be understandable without needing another chunk.
+
 <!-- YOU WRITE THIS ONE.
 
      How would you know if your chunks were the right size? Name something
@@ -73,12 +77,18 @@ in at least 4 of 5 tries.
 
 **Why this target:**
 
+Explain that campus_life documents are short and fact-focused, so most
+chunks should make sense independently.
 
 
 ---
 
 ## 5. Your choice
 
+
+
+For at least 4 of 5 test questions, the retrieved results should include
+the source document containing the expected answer.
 <!-- YOU WRITE THIS ONE TOO.
 
      Pick something you actually care about getting right. It could be about
@@ -91,7 +101,8 @@ in at least 4 of 5 tries.
 
 **Why this target:**
 
-
+Explain that retrieving vaguely related campus documents isn't enough;
+the system needs the document containing the fact needed for the answer.
 
 ---
 
