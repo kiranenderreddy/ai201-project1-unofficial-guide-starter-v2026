@@ -297,7 +297,7 @@ No acceptance criteria were missed after the improvement. All five criteria rema
 
 However, the evaluation only uses five in-scope questions and five clearly out-of-scope questions, so it does not prove that the system will perform equally well on harder, ambiguous, or borderline questions. The relevance gate was also tested on questions that are very different from the campus corpus, so future testing should include questions that are closer to the boundary of what the corpus covers.
 
-I stopped after the top-k improvement because Unit 2 requires one measured system change. A next step would be to expand the evaluation set with more difficult questions and borderline out-of-scope examples before changing the retrieval system again.
+After completing the required top-k improvement, I also tested a second stretch improvement by tightening the relevance threshold from 0.60 to 0.50. Beyond these two measured changes, a next step would be to expand the evaluation set with more difficult questions and borderline out-of-scope examples before making additional retrieval changes.
 <!-- For each criterion still missed after your fix: what you'd do about it,
      and why you stopped where you did.
 
@@ -333,3 +333,20 @@ In Unit 2 I used AI to understand the topics and also took help to evaluate my r
 Before making this change, I decided to test a stricter relevance threshold. The current cutoff is 0.60. In the earlier evaluations, the highest best-distance among the in-scope questions was about 0.377, while the lowest best-distance among the out-of-scope questions was about 0.825.
 
 I will reduce the relevance threshold from 0.60 to 0.50 and run the complete evaluation again. My goal is to test whether the stricter gate can preserve all in-scope answers while continuing to reject all out-of-scope questions.
+
+
+### Stretch Run Log
+
+| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
+|---|---|---|---|---|---|
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Sampled chunks contain complete, understandable thoughts | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Retrieved results include the correct source document | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+
+**Did the stretch improvement help?**
+
+The stricter relevance threshold did not produce a measurable change on the current evaluation set. After lowering the threshold from 0.60 to 0.50, all five in-scope questions still passed all three runs and all five out-of-scope questions were still refused.
+
+The best retrieval distances also remained unchanged because the threshold affects the gate decision rather than retrieval ranking. The result shows that the system can use a stricter relevance cutoff without rejecting any of the current in-scope questions, although this evaluation set was not difficult enough to show whether the tighter threshold provides a practical improvement on borderline queries.

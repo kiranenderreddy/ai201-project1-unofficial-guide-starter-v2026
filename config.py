@@ -33,7 +33,7 @@ CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
 
 # ─── Retrieval (Milestone 4) ─────────────────────────────────────────────────
 
-TOP_K = 5               # how many chunks to pull back per question
+TOP_K = 3              # how many chunks to pull back per question
 
 # The relevance gate. If the best chunk is further away than this, the system
 # refuses to answer instead of handing the model thin material.
@@ -47,7 +47,7 @@ TOP_K = 5               # how many chunks to pull back per question
 # answerable questions: 0.1847–0.3767
 # out-of-scope questions: 0.8246–0.93
 # 0.60 sits clearly between the two groups.
-THRESHOLD = 0.60
+THRESHOLD = 0.50
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────
