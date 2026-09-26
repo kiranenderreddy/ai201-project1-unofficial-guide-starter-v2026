@@ -174,11 +174,32 @@ I used AI throughout the project as a learning assistant to understand the RAG p
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5  | 5 of 5  | 5 of 5  | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5  | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Sampled chunks contain complete, understandable thoughts | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Retrieved results include the correct source document| 4 of 5 | 5 of 5 | 5 of 5 |  5 of 5 | MET |
+
+Produced by `run_eval.py::main`. Retrieval was performed by `store.py::search`, using chunks produced by `chunker.py::split_documents`.
+
+Example output:
+
+Question: How much does an official transcript cost?
+
+Best distance: 0.1847
+
+Sources retrieved:
+- admin_add_drop_deadline.txt
+- admin_printing_quota.txt
+- admin_transcript_requests.txt
+- course_hist_118.txt
+- money_textbooks.txt
+
+Answer:
+
+An official transcript costs $8.
+
+Source: admin_transcript_requests.txt
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
@@ -197,11 +218,11 @@ I used AI throughout the project as a learning assistant to understand the RAG p
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 |  Retrieved chunks contain the answer | MET | The target was at least 4 of 5 questions. All 5 questions retrieved a chunk containing the expected answer, producing 5/5 across the checks. |
+| 2 |  Every answer names a source | MET | The target required every answer to name at least one source document. All 5 answers included source attribution in each of the three runs. |
+| 3 |  The relevance gate stops out-of-corpus questions | MET | The target was at least 4 of 5 refusals. The gate refused all 5 out-of-scope questions because their best distances were above the 0.60 cutoff. |
+| 4 |  Sampled chunks contain complete, understandable thoughts | MET | The target was at least 4 of 5 chunks. All 5 sampled chunks contained complete thoughts and could be understood without neighboring chunks in each check. |
+| 5 |  Retrieved results include the correct source document | MET | The target was at least 4 of 5 questions. The correct source document appeared in the retrieved results for all 5 questions. |
 
 ## Diagnoses
 
@@ -223,11 +244,22 @@ I used AI throughout the project as a learning assistant to understand the RAG p
 
      Milestone 3. -->
 
+No criteria were missed in the baseline evaluation. All five criteria were met across the required runs.
+
+However, Criterion 1 was probably too lenient. The original target only required an answer-containing chunk to be retrieved for at least 4 of 5 questions, and the system achieved 5 of 5 consistently.
+
+A stronger future target would require the answer-containing chunk to appear within the top three retrieved results for all 5 test questions. This would measure not only whether the correct information was retrieved, but whether it was ranked highly enough to provide strong context to the LLM.
+
 ## The Improvement
 
 **What I changed:**
 
+I reduced retrieval top-k from 5 to 3, so the system now sends only the three highest-ranked retrieved chunks to the generation step instead of five.
+
+
 **Why I picked it:**
+
+The baseline evaluation showed that the answer-containing source was consistently ranked near the top of the retrieval results for all five test questions. My diagnosis also showed that Criterion 1 was too lenient because it only required the correct information to appear somewhere in the retrieved set. Reducing top-k to 3 tests whether the system can preserve retrieval quality while providing the LLM with less unrelated context.
 
 <!-- Connect it to a specific diagnosis above in one sentence. If you can't,
      you picked a fix because it sounded impressive. -->
@@ -239,11 +271,11 @@ I used AI throughout the project as a learning assistant to understand the RAG p
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Sampled chunks contain complete, understandable thoughts | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Retrieved results include the correct source document | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
 
 **Did it help?**
 
@@ -254,8 +286,18 @@ I used AI throughout the project as a learning assistant to understand the RAG p
 
      Milestone 4. -->
 
+Yes, the change improved efficiency without reducing the measured quality of the RAG system. Before the change, with top-k set to 5, the baseline evaluation used 7,923 input tokens across 15 model calls. After reducing top-k to 3, the same evaluation used 5,316 input tokens, a reduction of about 33%.
+
+All five in-corpus questions still passed all three runs, the relevance gate still refused all 5 out-of-scope questions, and the best retrieval distances remained unchanged. This shows that the additional fourth and fifth retrieved chunks were not necessary for these test questions, and the system could provide the same measured answer quality with less context sent to the LLM.
+
 ## What's Still Broken
 
+
+No acceptance criteria were missed after the improvement. All five criteria remained MET after reducing top-k from 5 to 3.
+
+However, the evaluation only uses five in-scope questions and five clearly out-of-scope questions, so it does not prove that the system will perform equally well on harder, ambiguous, or borderline questions. The relevance gate was also tested on questions that are very different from the campus corpus, so future testing should include questions that are closer to the boundary of what the corpus covers.
+
+I stopped after the top-k improvement because Unit 2 requires one measured system change. A next step would be to expand the evaluation set with more difficult questions and borderline out-of-scope examples before changing the retrieval system again.
 <!-- For each criterion still missed after your fix: what you'd do about it,
      and why you stopped where you did.
 
@@ -270,3 +312,24 @@ I used AI throughout the project as a learning assistant to understand the RAG p
      differently, and why?
 
      Milestone 5. -->
+     
+If I were writing the acceptance criteria again, I would make Criterion 1 stricter.
+
+The original criterion required an answer-containing chunk to appear somewhere in the retrieved results for at least 4 of 5 questions. Because the system achieved 5 of 5 consistently, this target did not test retrieval ranking very strongly.
+
+I would instead write:
+
+For all 5 test questions, an answer-containing chunk should appear within the top three retrieved results.
+
+This would test not only whether the system can retrieve the correct information, but whether it ranks the useful evidence highly enough to provide focused context to the LLM.
+
+
+In Unit 2 I used AI to understand the topics and also took help to evaluate my results 
+
+
+
+### Stretch Improvement — Tighter Relevance Gate
+
+Before making this change, I decided to test a stricter relevance threshold. The current cutoff is 0.60. In the earlier evaluations, the highest best-distance among the in-scope questions was about 0.377, while the lowest best-distance among the out-of-scope questions was about 0.825.
+
+I will reduce the relevance threshold from 0.60 to 0.50 and run the complete evaluation again. My goal is to test whether the stricter gate can preserve all in-scope answers while continuing to reject all out-of-scope questions.
